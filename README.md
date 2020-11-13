@@ -15,3 +15,19 @@ Feel free to implement the API with whichever library you prefer
 Follow you're usual development practices
 
 **The candidates should provide a link to a repo on Github containing the code sample.**
+
+## Run the API
+
+```
+cd api && bundle
+bundle exec rails db:setup && bundle exec rails db:seed
+PORT=3001 bundle exec rails s
+```
+
+## Run the client
+
+```
+cd client
+yarn install
+yarn start
+```
