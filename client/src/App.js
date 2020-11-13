@@ -1,25 +1,72 @@
-import logo from './logo.svg';
 import './App.css';
+import { gql, useLazyQuery, useQuery } from '@apollo/client';
 
-function App() {
+const GET_SPACES_QUERY = gql`
+  query GetSpaces {
+    spaces {
+      id
+      name
+    }
+  }
+`
+
+const GET_BOOKINGS_QUERY = gql`
+  query GetBookings($spaceId: ID!) {
+    bookings(spaceId: $spaceId) {
+      description
+      startDate
+      endDate
+    }
+  }
+`
+
+const App = () => {
+  const handleSpaceSelection = (e) => {
+    const spaceId = e.target.value;
+    fetchBookings({ variables: { spaceId }});
+  }
+
+  const { data: spacesData, loading } = useQuery(GET_SPACES_QUERY);
+  const [fetchBookings, { data: bookingsData }] = useLazyQuery(GET_BOOKINGS_QUERY);
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div>
+        <h2>Bookings search</h2>
+        <select onChange={handleSpaceSelection}>
+          <option disabled selected value> -- select a space -- </option>
+          {spacesData.spaces.map(({id, name}) => <option key={id} value={id}>{name}</option>)}
+        </select>
+      </div>
+      <hr></hr>
+      {bookingsData?.bookings && <BookingResults bookings={bookingsData.bookings} />}
     </div>
   );
+}
+
+const BookingResults = ({ bookings }) => {
+  return (
+    <table className="BookingsResults">
+      <tr>
+        <th>Description</th>
+        <th>Start date</th>
+        <th>End date</th>
+      </tr>
+      {
+        bookings.map(({ description, startDate, endDate }) => (
+          <tr>
+            <td>{description}</td>
+            <td>{startDate}</td>
+            <td>{endDate}</td>
+          </tr>
+        ))
+      }
+    </table>
+  )
 }
 
 export default App;
